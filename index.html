@@ -120,14 +120,7 @@
                                 <tr>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pass Photo</th>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Lengkap</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">NIS</th>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Kelas</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">TTL</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Ayah</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Ibu</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Wali</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Alamat</th>
-                                    <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Telepon Ortu</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="bg-white divide-y divide-gray-200">
@@ -200,10 +193,39 @@
     </div>
 
     <!-- ===== MODAL (Popup Foto) ===== -->
+    <!-- PERUBAHAN: Struktur modal diubah total untuk memuat biodata -->
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden" onclick="hideModal()">
-        <div class="bg-white p-4 rounded-lg shadow-xl max-w-sm w-full modal-content-animate" onclick="event.stopPropagation()">
-            <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain" style="max-height: 70vh;">
-            <button onclick="hideModal()" class="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors">
+        <!-- PERUBAHAN: max-w-sm diubah ke max-w-2xl agar lebih lebar -->
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full modal-content-animate" onclick="event.stopPropagation()">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Kolom 1: Foto -->
+                <div>
+                    <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain" style="max-height: 70vh;">
+                </div>
+                
+                <!-- Kolom 2: Biodata -->
+                <div class="space-y-2 text-sm text-gray-700">
+                    <h3 class="text-xl font-bold mb-3 text-gray-900" id="modal-nama">Nama Lengkap Santri</h3>
+                    
+                    <p><strong>NIS:</strong> <span id="modal-nis">-</span></p>
+                    <p><strong>Kelas:</strong> <span id="modal-kelas">-</span></p>
+                    <p><strong>TTL:</strong> <span id="modal-ttl">-</span></p>
+                    
+                    <hr class="my-3">
+                    
+                    <p><strong>Nama Ayah:</strong> <span id="modal-ayah">-</span></p>
+                    <p><strong>Nama Ibu:</strong> <span id="modal-ibu">-</span></p>
+                    <p><strong>Telepon Ortu:</strong> <span id="modal-telepon">-</span></p>
+                    
+                    <hr class="my-3">
+                    
+                    <p><strong>Alamat:</strong></p>
+                    <p id="modal-alamat" class="break-words bg-gray-50 p-2 rounded-md h-24 overflow-y-auto">-</p>
+                </div>
+            </div>
+            
+            <button onclick="hideModal()" class="mt-6 w-full py-2 px-4 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors">
                 Tutup
             </button>
         </div>
@@ -369,7 +391,8 @@
             noDataMessage.classList.add('hidden');
 
             // Loop dan buat baris tabel
-            filteredStudents.forEach(student => {
+            // PERUBAHAN: Menambahkan 'index' ke loop
+            filteredStudents.forEach((student, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors';
                 
@@ -383,19 +406,12 @@
                             src="${photoUrl}" 
                             alt="Foto ${studentName}" 
                             class="h-12 w-12 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                            onclick="showModal('${photoUrl}', '${studentName}')"
+                            onclick="showModal(${index})"
                             onerror="this.src='https://placehold.co/100x100/e2e8f0/94a3b8?text=Error'"
                         >
                     </td>
                     <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${studentName}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['NIS'] || 'N/A'}</td>
                     <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Kelas'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Tempat Tanggal Lahir'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Nama Ibu'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Nama Wali'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600 max-w-xs truncate" title="${student['Alamat'] || ''}">${student['Alamat'] || 'N/A'}</td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Nomor Telepon Orang Tua'] || 'N/A'}</td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -624,20 +640,47 @@
         // ===========================================
         // FUNGSI MODAL (POPUP)
         // ===========================================
-        function showModal(imageUrl, altText) {
-            modalImage.src = imageUrl;
-            modalImage.alt = altText;
+        // PERUBAHAN: Fungsi diubah untuk menerima 'index' dari array filteredStudents
+        function showModal(index) {
+            const student = filteredStudents[index];
+            if (!student) return; // Keluar jika data siswa tidak ditemukan
+
+            const photoUrl = student['Pass Photo'] || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Foto';
+            const studentName = student['Nama Lengkap'] || 'Foto Santri';
+
+            // Mengisi Foto
+            modalImage.src = photoUrl;
+            modalImage.alt = studentName;
+
+            // PERUBAHAN BARU: Mengisi Biodata
+            document.getElementById('modal-nama').textContent = student['Nama Lengkap'] || 'N/A';
+            document.getElementById('modal-nis').textContent = student['NIS'] || 'N/A';
+            document.getElementById('modal-kelas').textContent = student['Kelas'] || 'N/A';
+            document.getElementById('modal-ttl').textContent = student['Tempat Tanggal Lahir'] || 'N/A';
+            document.getElementById('modal-ayah').textContent = student['DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah'] || 'N/A';
+            document.getElementById('modal-ibu').textContent = student['Nama Ibu'] || 'N/A';
+            document.getElementById('modal-telepon').textContent = student['Nomor Telepon Orang Tua'] || 'N/A';
+            document.getElementById('modal-alamat').textContent = student['Alamat'] || 'N/A';
+
+            // Tampilkan Modal
             modal.classList.remove('hidden');
-            // Menambahkan class animasi
-            modal.querySelector('.bg-black').classList.add('modal-bg-animate');
+            
+            // --- PERBAIKAN ---
+            // 'modal' adalah elemen dengan .bg-black, jadi terapkan animasi langsung ke 'modal'
+            modal.classList.add('modal-bg-animate');
+            // 'modal-content-animate' adalah anak dari 'modal', jadi gunakan querySelector
             modal.querySelector('.modal-content-animate').classList.add('modal-content-animate');
+            // --- AKHIR PERBAIKAN ---
         }
 
         function hideModal() {
             modal.classList.add('hidden');
-            // Hapus class animasi (opsional, tapi bersih)
-            modal.querySelector('.bg-black').classList.remove('modal-bg-animate');
+            
+            // --- PERBAIKAN ---
+            // Hapus class animasi dari elemen yang benar
+            modal.classList.remove('modal-bg-animate');
             modal.querySelector('.modal-content-animate').classList.remove('modal-content-animate');
+            // --- AKHIR PERBAIKAN ---
         }
 
         // ===========================================
