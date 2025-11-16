@@ -193,15 +193,16 @@
     </div>
 
     <!-- ===== MODAL (Popup Foto) ===== -->
-    <!-- PERUBAHAN: Struktur modal diubah total untuk memuat biodata -->
-    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden" onclick="hideModal()">
-        <!-- PERUBAHAN: max-w-sm diubah ke max-w-2xl agar lebih lebar -->
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full modal-content-animate" onclick="event.stopPropagation()">
+    <!-- PERUBAHAN: Mengubah 'items-center' ke 'items-start' dan menambah 'overflow-y-auto' -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-start justify-center p-4 z-50 hidden overflow-y-auto" onclick="hideModal()">
+        <!-- PERUBAHAN: max-w-sm diubah ke max-w-2xl agar lebih lebar, 'my-8' ditambah untuk margin vertikal saat scroll -->
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full modal-content-animate my-8" onclick="event.stopPropagation()">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Kolom 1: Foto -->
                 <div>
-                    <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain" style="max-height: 70vh;">
+                    <!-- PERUBAHAN: style="..." dihapus, diganti class 'max-h-[45vh] md:max-h-[70vh]' -->
+                    <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain max-h-[45vh] md:max-h-[70vh]">
                 </div>
                 
                 <!-- Kolom 2: Biodata -->
