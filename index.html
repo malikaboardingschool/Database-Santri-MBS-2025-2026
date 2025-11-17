@@ -411,7 +411,13 @@
                             onerror="this.src='https://placehold.co/100x100/e2e8f0/94a3b8?text=Error'"
                         >
                     </td>
-                    <td class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${studentName}</td>
+                    <!-- PERUBAHAN: Menambahkan onclick dan styling ke Nama Lengkap -->
+                    <td 
+                        class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                        onclick="showModal(${index})"
+                    >
+                        ${studentName}
+                    </td>
                     <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Kelas'] || 'N/A'}</td>
                 `;
                 tableBody.appendChild(tr);
