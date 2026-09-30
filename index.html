@@ -11,6 +11,9 @@
     <!-- Memuat Chart.js untuk Infografis -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- Memuat Plugin DataLabels untuk memunculkan angka di chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    
     <!-- Memuat D3.js (dibutuhkan untuk d3.rollup di chart) -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -62,7 +65,7 @@
         <!-- ===== HEADER ===== -->
         <header class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div class="flex items-center space-x-4">
-                <img src="https://iili.io/FsLlXA7.png" alt="Logo Malika IBS" class="h-12 md:h-16 w-auto">
+                <img src="https://iili.io/FsLlXA7.png" alt="Logo Malika IBS" class="h-12 md:h-16 w-auto" onerror="this.src='https://placehold.co/64x64/2563eb/ffffff?text=M'">
                 <h1 class="text-xl md:text-3xl font-bold text-gray-700">
                     Database Santri SMP SMA Malika IBS
                 </h1>
@@ -116,7 +119,7 @@
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-100"> <!-- Header Abu-abu Sesuai Permintaan -->
+                            <thead class="bg-gray-100">
                                 <tr>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Pass Photo</th>
                                     <th class="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nama Lengkap</th>
@@ -149,23 +152,20 @@
                         </div>
                     </div>
 
-                    <!-- CHART BARU: Total SMP vs SMA (Doughnut) -->
+                    <!-- Chart 2: Total SMP vs SMA (Doughnut) -->
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
                         <h2 class="text-xl font-bold mb-4 text-gray-700">Total Santri (SMP vs SMA)</h2>
                         <p class="text-sm text-gray-600 mb-4">Grafik ini membandingkan jumlah total santri dari jenjang SMP dan SMA.</p>
                         <div class="relative h-80 w-full">
-                            <canvas id="total-level-chart"></canvas> <!-- ID Baru -->
+                            <canvas id="total-level-chart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Chart 2 & 3: Detail Putra dan Putri (Bar) -->
-                    <!-- PERUBAHAN: Dihapus div 'space-y-6' dari sini -->
-                    
                     <!-- Chart 3: Detail Putra -->
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
                         <h2 class="text-xl font-bold mb-4 text-gray-700">Detail Siswa (Putra)</h2>
                         <p class="text-sm text-gray-600 mb-4">Perbandingan jumlah siswa (Putra) di jenjang SMP dan SMA.</p>
-                        <div class="relative h-80 w-full"> <!-- PERUBAHAN: h-48 diubah jadi h-80 -->
+                        <div class="relative h-80 w-full">
                             <canvas id="putra-chart"></canvas>
                         </div>
                     </div>
@@ -174,11 +174,10 @@
                     <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
                         <h2 class="text-xl font-bold mb-4 text-gray-700">Detail Siswi (Putri)</h2>
                         <p class="text-sm text-gray-600 mb-4">Perbandingan jumlah siswi (Putri) di jenjang SMP dan SMA.</p>
-                        <div class="relative h-80 w-full"> <!-- PERUBAHAN: h-48 diubah jadi h-80 -->
+                        <div class="relative h-80 w-full">
                             <canvas id="putri-chart"></canvas>
                         </div>
                     </div>
-                    <!-- PERUBAHAN: Akhir dari div 'space-y-6' yang dihapus -->
 
                 </div>
             </div>
@@ -187,22 +186,19 @@
 
         <!-- ===== FOOTER ===== -->
         <footer class="mt-10 text-center text-sm text-gray-500">
-            <p>&copy; 2025 Malika IBS. Dibuat dengan ❤️.</p>
+            <p>&copy; 2026-2027 Malika IBS. Dibuat dengan ❤️.</p>
         </footer>
 
     </div>
 
     <!-- ===== MODAL (Popup Foto) ===== -->
-    <!-- PERUBAHAN: Mengubah 'items-center' ke 'items-start' dan menambah 'overflow-y-auto' -->
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-start justify-center p-4 z-50 hidden overflow-y-auto" onclick="hideModal()">
-        <!-- PERUBAHAN: max-w-sm diubah ke max-w-2xl agar lebih lebar, 'my-8' ditambah untuk margin vertikal saat scroll -->
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full modal-content-animate my-8" onclick="event.stopPropagation()">
+        <div id="modal-content" class="bg-white p-6 rounded-lg shadow-xl max-w-2xl w-full modal-content-animate my-8" onclick="event.stopPropagation()">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Kolom 1: Foto -->
                 <div>
-                    <!-- PERUBAHAN: style="..." dihapus, diganti class 'max-h-[45vh] md:max-h-[70vh]' -->
-                    <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain max-h-[45vh] md:max-h-[70vh]">
+                    <img id="modal-image" src="" alt="Pass Photo Santri" class="w-full h-auto rounded-lg object-contain max-h-[45vh] md:max-h-[70vh]" onerror="this.src='https://placehold.co/300x400/e2e8f0/94a3b8?text=Foto+Santri'">
                 </div>
                 
                 <!-- Kolom 2: Biodata -->
@@ -235,22 +231,19 @@
 
     <!-- ===== JAVASCRIPT UTAMA ===== -->
     <script>
-        // --- PERUBAHAN ---
-        // URL Google Sheet diubah ke format Google Visualization API (gviz)
-        // untuk menghindari masalah CORS
+        // URL Google Sheet dengan format Google Visualization API (gviz)
         const SHEET_ID = '1ksLXwCPBsMPK96kyf3smkUskLWAx3jDjz34UVQzn_iI';
         const GID = '0';
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
-        // --- AKHIR PERUBAHAN ---
 
         // Variabel global
         let allStudents = [];
         let filteredStudents = [];
-        let activeCharts = {}; // Mengganti studentChart menjadi objek untuk >1 chart
+        let activeCharts = {};
 
         // Referensi Elemen DOM
         const loadingSpinner = document.getElementById('loading-spinner');
-        const loadingText = document.getElementById('loading-text'); // Tambahkan referensi ini
+        const loadingText = document.getElementById('loading-text');
         const mainContent = document.getElementById('main-content');
         const tableBody = document.getElementById('table-body');
         const noDataMessage = document.getElementById('no-data-message');
@@ -267,15 +260,16 @@
 
         // Elemen Modal
         const modal = document.getElementById('image-modal');
+        const modalContent = document.getElementById('modal-content');
         const modalImage = document.getElementById('modal-image');
-
-        // Elemen Chart
-        // (Kanvas chart diambil di dalam fungsi render)
 
         // ===========================================
         // INISIALISASI
         // ===========================================
         document.addEventListener('DOMContentLoaded', () => {
+            // Daftarkan plugin DataLabels secara global agar angka muncul di chart
+            Chart.register(ChartDataLabels);
+            
             fetchData();
             setupEventListeners();
             setActiveTab('biodata'); // Set tab default
@@ -286,7 +280,6 @@
         // ===========================================
         async function fetchData() {
             try {
-                // --- PERUBAHAN ---
                 // Gunakan fetch untuk mengambil data JSON dari gviz
                 const response = await fetch(SHEET_URL);
                 if (!response.ok) {
@@ -297,12 +290,10 @@
                 const text = await response.text();
                 
                 // Hapus wrapper JSONP untuk mendapatkan JSON murni
-                // google.visualization.Query.setResponse(...)
                 const jsonText = text.substring(text.indexOf('(') + 1, text.lastIndexOf(')'));
                 const json = JSON.parse(jsonText);
 
                 if (json.status !== 'ok') {
-                    // Tangani error yang dilaporkan oleh Google
                     throw new Error(json.errors.map(e => e.detailed_message).join('\n'));
                 }
 
@@ -310,25 +301,19 @@
                 // Ambil label kolom (header)
                 const cols = dataTable.cols.map(col => col.label);
                 
-                // --- PERUBAHAN: DEBUGGING ---
-                // Tampilkan di console nama header yang SEBENARNYA diterima dari Google Sheet
-                // Ini untuk memeriksa apakah "Nama Ayah" sudah benar ejaannya (case-sensitive)
                 console.log('HEADER DARI GOOGLE SHEET (Cek "Nama Ayah"):', cols);
-                // --- AKHIR PERUBAHAN ---
                 
                 // Ubah data baris gviz menjadi array objek
                 allStudents = dataTable.rows.map(row => {
                     const student = {};
                     row.c.forEach((cell, i) => {
-                        const key = cols[i]; // Gunakan label kolom sebagai kunci
-                        if (key) { // Pastikan kolom memiliki label
-                            // Ambil nilai 'f' (formatted) jika ada, jika tidak, ambil 'v' (value)
+                        const key = cols[i];
+                        if (key) {
                             student[key] = cell ? (cell.f ? cell.f : cell.v) : null;
                         }
                     });
                     return student;
                 });
-                // --- AKHIR PERUBAHAN ---
                 
                 // Membersihkan data jika ada baris kosong (kolom 'Nama Lengkap' harus ada)
                 allStudents = allStudents.filter(student => student['Nama Lengkap'] && student['Nama Lengkap'].trim() !== '');
@@ -337,29 +322,22 @@
                 // Panggil fungsi render
                 populateClassFilter();
                 renderTable();
-                renderAllCharts(); // Mengganti nama fungsi
+                renderAllCharts();
 
                 // Tampilkan konten setelah data siap
                 loadingSpinner.classList.add('hidden');
                 mainContent.classList.remove('hidden');
 
             } catch (error) {
-                // --- PERUBAHAN ---
-                // Menambahkan komentar klarifikasi pada console.error
-                console.error('Error fetching data (ini WAJAR terjadi di sandbox):', error.message);
+                console.error('Error fetching data (menggunakan fallback mock data):', error.message);
                 
-                // --- PERUBAHAN: FALLBACK KE MOCK DATA ---
-                // Menambahkan komentar klarifikasi pada console.error
-                console.error('Error fetching data (ini WAJAR terjadi di sandbox):', error.message);
-                
-                // --- PERUBAHAN: FALLBACK KE MOCK DATA ---
-                // Definisikan Mock Data
+                // Definisikan Mock Data apabila koneksi diblokir atau offline
                 const MOCK_DATA = [
-                    { 'Nama Lengkap': 'Ahmad Fulan (Demo)', 'NIS': '12345', 'Kelas': 'SMA 10', 'Tempat Tanggal Lahir': 'Jakarta, 01 Jan 2008', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Budi', 'Nama Ibu': 'Citra', 'Nama Wali': '-', 'Alamat': 'Jl. Mawar No. 1', 'Nomor Telepon Orang Tua': '0812345678', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Ahmad' },
-                    { 'Nama Lengkap': 'Badriyah Silva (Demo)', 'NIS': '12346', 'Kelas': 'SMP 7', 'Tempat Tanggal Lahir': 'Bogor, 02 Feb 2011', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Deni', 'Nama Ibu': 'Eka', 'Nama Wali': '-', 'Alamat': 'Jl. Melati No. 2', 'Nomor Telepon Orang Tua': '0812345679', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Badriyah' },
-                    { 'Nama Lengkap': 'Citra Lestari (Demo)', 'NIS': '12347', 'Kelas': 'SMA 11', 'Tempat Tanggal Lahir': 'Depok, 03 Mar 2007', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Fajar', 'Nama Ibu': 'Gita', 'Nama Wali': '-', 'Alamat': 'Jl. Anggrek No. 3', 'Nomor Telepon Orang Tua': '0812345680', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Citra' },
-                    { 'Nama Lengkap': 'Deni Setiawan (Demo)', 'NIS': '12348', 'Kelas': 'SMP 8', 'Tempat Tanggal Lahir': 'Tangerang, 04 Apr 2010', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Haris', 'Nama Ibu': 'Ina', 'Nama Wali': '-', 'Alamat': 'Jl. Kamboja No. 4', 'Nomor Telepon Orang Tua': '0812345681', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Deni' },
-                    { 'Nama Lengkap': 'Eka Putri (Demo)', 'NIS': '12349', 'Kelas': 'SMA 10', 'Tempat Tanggal Lahir': 'Bekasi, 05 Mei 2008', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Joko', 'Nama Ibu': 'Kurnia', 'Nama Wali': '-', 'Alamat': 'Jl. Tulip No. 5', 'Nomor Telepon Orang Tua': '0812345682', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Eka' }
+                    { 'Nama Lengkap': 'Ahmad Fulan (Demo)', 'NIS': '12345', 'Kelas': 'SMA 10 Putra', 'Tempat Tanggal Lahir': 'Jakarta, 01 Jan 2008', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Budi', 'Nama Ibu': 'Citra', 'Nama Wali': '-', 'Alamat': 'Jl. Mawar No. 1', 'Nomor Telepon Orang Tua': '0812345678', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Ahmad' },
+                    { 'Nama Lengkap': 'Badriyah Silva (Demo)', 'NIS': '12346', 'Kelas': 'SMP 7 Putri', 'Tempat Tanggal Lahir': 'Bogor, 02 Feb 2011', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Deni', 'Nama Ibu': 'Eka', 'Nama Wali': '-', 'Alamat': 'Jl. Melati No. 2', 'Nomor Telepon Orang Tua': '0812345679', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Badriyah' },
+                    { 'Nama Lengkap': 'Citra Lestari (Demo)', 'NIS': '12347', 'Kelas': 'SMA 11 Putri', 'Tempat Tanggal Lahir': 'Depok, 03 Mar 2007', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Fajar', 'Nama Ibu': 'Gita', 'Nama Wali': '-', 'Alamat': 'Jl. Anggrek No. 3', 'Nomor Telepon Orang Tua': '0812345680', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Citra' },
+                    { 'Nama Lengkap': 'Deni Setiawan (Demo)', 'NIS': '12348', 'Kelas': 'SMP 8 Putra', 'Tempat Tanggal Lahir': 'Tangerang, 04 Apr 2010', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Haris', 'Nama Ibu': 'Ina', 'Nama Wali': '-', 'Alamat': 'Jl. Kamboja No. 4', 'Nomor Telepon Orang Tua': '0812345681', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Deni' },
+                    { 'Nama Lengkap': 'Eka Putri (Demo)', 'NIS': '12349', 'Kelas': 'SMA 10 Putri', 'Tempat Tanggal Lahir': 'Bekasi, 05 Mei 2008', 'DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah': 'Joko', 'Nama Ibu': 'Kurnia', 'Nama Wali': '-', 'Alamat': 'Jl. Tulip No. 5', 'Nomor Telepon Orang Tua': '0812345682', 'Pass Photo': 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Eka' }
                 ];
 
                 allStudents = MOCK_DATA;
@@ -368,12 +346,10 @@
                 // Panggil fungsi render dengan data mock
                 populateClassFilter();
                 renderTable();
-                renderAllCharts(); // Mengganti nama fungsi
+                renderAllCharts();
 
-                // Sembunyikan spinner (tapi biarkan pesan error/fallback terlihat sebentar)
-                loadingSpinner.querySelector('svg').classList.add('hidden'); // Sembunyikan SVG spinner-nya saja
+                loadingSpinner.classList.add('hidden');
                 mainContent.classList.remove('hidden');
-                // --- AKHIR PERUBAHAN ---
             }
         }
  
@@ -392,7 +368,6 @@
             noDataMessage.classList.add('hidden');
 
             // Loop dan buat baris tabel
-            // PERUBAHAN: Menambahkan 'index' ke loop
             filteredStudents.forEach((student, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors';
@@ -411,7 +386,6 @@
                             onerror="this.src='https://placehold.co/100x100/e2e8f0/94a3b8?text=Error'"
                         >
                     </td>
-                    <!-- PERUBAHAN: Menambahkan onclick dan styling ke Nama Lengkap -->
                     <td 
                         class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
                         onclick="showModal(${index})"
@@ -437,30 +411,29 @@
             return 'Lainnya';
         }
 
-        // Helper function baru untuk menentukan jenis kelamin dari "Kelas"
+        // Helper function untuk menentukan jenis kelamin dari "Kelas"
         function getGender(kelas) {
             if (!kelas || typeof kelas !== 'string') return 'Lainnya';
             const k = kelas.toLowerCase();
             if (k.includes('putra')) return 'Putra';
             if (k.includes('putri')) return 'Putri';
-            return 'Lainnya'; // Jika tidak terdeteksi
+            return 'Lainnya';
         }
 
         function renderAllCharts() {
             // 1. Hancurkan chart lama jika ada
             if (activeCharts.totalGender) activeCharts.totalGender.destroy();
-            if (activeCharts.totalLevel) activeCharts.totalLevel.destroy(); // BARU
+            if (activeCharts.totalLevel) activeCharts.totalLevel.destroy();
             if (activeCharts.putra) activeCharts.putra.destroy();
             if (activeCharts.putri) activeCharts.putri.destroy();
             
             // 2. Ambil canvas
             const ctxTotalGender = document.getElementById('total-gender-chart')?.getContext('2d');
-            const ctxTotalLevel = document.getElementById('total-level-chart')?.getContext('2d'); // BARU
+            const ctxTotalLevel = document.getElementById('total-level-chart')?.getContext('2d');
             const ctxPutra = document.getElementById('putra-chart')?.getContext('2d');
             const ctxPutri = document.getElementById('putri-chart')?.getContext('2d');
 
-            // Jika canvas tidak ditemukan (misal di tab tersembunyi), jangan render
-            if (!ctxTotalGender || !ctxTotalLevel || !ctxPutra || !ctxPutri) return; // BARU: Menambahkan ctxTotalLevel
+            if (!ctxTotalGender || !ctxTotalLevel || !ctxPutra || !ctxPutri) return;
 
             // 3. Proses data
             let counts = {
@@ -468,7 +441,7 @@
                 smpPutri: 0,
                 smaPutra: 0,
                 smaPutri: 0,
-                lainnya: 0 // Gender atau Level tidak terdeteksi
+                lainnya: 0
             };
 
             allStudents.forEach(student => {
@@ -490,8 +463,6 @@
 
             const totalPutra = counts.smpPutra + counts.smaPutra;
             const totalPutri = counts.smpPutri + counts.smaPutri;
-
-            // DATA BARU
             const totalSmp = counts.smpPutra + counts.smpPutri;
             const totalSma = counts.smaPutra + counts.smaPutri;
 
@@ -525,13 +496,17 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } },
-                        tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} santri` } }
+                        tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} santri` } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 16 },
+                            formatter: (value) => value > 0 ? value : '' // Sembunyikan jika nilainya 0
+                        }
                     }
                 }
             });
 
-            // RENDER CHART BARU
-            // 4.5. Render Chart 2: Total SMP vs SMA (Doughnut)
+            // 5. Render Chart 2: Total SMP vs SMA (Doughnut)
             const levelLabels = ['SMP', 'SMA'];
             const levelData = [totalSmp, totalSma];
             if (counts.lainnya > 0) {
@@ -561,14 +536,19 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } },
-                        tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} santri` } }
+                        tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.raw} santri` } },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { weight: 'bold', size: 16 },
+                            formatter: (value) => value > 0 ? value : ''
+                        }
                     }
                 }
             });
 
             // Opsi umum untuk bar chart horizontal
             const barOptions = {
-                indexAxis: 'y', // Membuat bar menjadi horizontal
+                indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
@@ -576,12 +556,19 @@
                     y: { grid: { display: false } }
                 },
                 plugins: {
-                    legend: { display: false }, // Sembunyikan legenda, sudah jelas dari judul
-                    tooltip: { callbacks: { label: (c) => ` ${c.raw} siswa` } }
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (c) => ` ${c.raw} siswa` } },
+                    datalabels: {
+                        color: '#ffffff',
+                        font: { weight: 'bold', size: 14 },
+                        align: 'center',
+                        anchor: 'center',
+                        formatter: (value) => value > 0 ? value : ''
+                    }
                 }
             };
 
-            // 5. Render Chart 2: Detail Putra (Bar)
+            // 6. Render Chart 3: Detail Putra (Bar)
             activeCharts.putra = new Chart(ctxPutra, {
                 type: 'bar',
                 data: {
@@ -597,7 +584,7 @@
                 options: barOptions
             });
 
-            // 6. Render Chart 3: Detail Putri (Bar)
+            // 7. Render Chart 4: Detail Putri (Bar)
             activeCharts.putri = new Chart(ctxPutri, {
                 type: 'bar',
                 data: {
@@ -618,6 +605,7 @@
         // FUNGSI FILTER
         // ===========================================
         function populateClassFilter() {
+            classFilter.innerHTML = '<option value="">Semua Kelas</option>';
             const classes = [...new Set(allStudents.map(s => s.Kelas))];
             classes.sort().forEach(kelas => {
                 if (kelas && kelas.trim() !== '') {
@@ -634,7 +622,6 @@
             const selectedClass = classFilter.value;
 
             filteredStudents = allStudents.filter(student => {
-                // Tambahkan pengecekan null/undefined sebelum .toLowerCase()
                 const name = student['Nama Lengkap'] || '';
                 const nameMatch = name.toLowerCase().includes(searchText);
                 const classMatch = (selectedClass === '' || student.Kelas === selectedClass);
@@ -647,10 +634,9 @@
         // ===========================================
         // FUNGSI MODAL (POPUP)
         // ===========================================
-        // PERUBAHAN: Fungsi diubah untuk menerima 'index' dari array filteredStudents
         function showModal(index) {
             const student = filteredStudents[index];
-            if (!student) return; // Keluar jika data siswa tidak ditemukan
+            if (!student) return;
 
             const photoUrl = student['Pass Photo'] || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Foto';
             const studentName = student['Nama Lengkap'] || 'Foto Santri';
@@ -659,42 +645,36 @@
             modalImage.src = photoUrl;
             modalImage.alt = studentName;
 
-            // PERUBAHAN BARU: Mengisi Biodata
+            // Mengisi Biodata
             document.getElementById('modal-nama').textContent = student['Nama Lengkap'] || 'N/A';
             document.getElementById('modal-nis').textContent = student['NIS'] || 'N/A';
             document.getElementById('modal-kelas').textContent = student['Kelas'] || 'N/A';
             document.getElementById('modal-ttl').textContent = student['Tempat Tanggal Lahir'] || 'N/A';
-            document.getElementById('modal-ayah').textContent = student['DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah'] || 'N/A';
+            document.getElementById('modal-ayah').textContent = student['DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah'] || student['Nama Ayah'] || 'N/A';
             document.getElementById('modal-ibu').textContent = student['Nama Ibu'] || 'N/A';
             document.getElementById('modal-telepon').textContent = student['Nomor Telepon Orang Tua'] || 'N/A';
             document.getElementById('modal-alamat').textContent = student['Alamat'] || 'N/A';
 
             // Tampilkan Modal
             modal.classList.remove('hidden');
-            
-            // --- PERBAIKAN ---
-            // 'modal' adalah elemen dengan .bg-black, jadi terapkan animasi langsung ke 'modal'
             modal.classList.add('modal-bg-animate');
-            // 'modal-content-animate' adalah anak dari 'modal', jadi gunakan querySelector
-            modal.querySelector('.modal-content-animate').classList.add('modal-content-animate');
-            // --- AKHIR PERBAIKAN ---
+            if (modalContent) {
+                modalContent.classList.add('modal-content-animate');
+            }
         }
 
         function hideModal() {
             modal.classList.add('hidden');
-            
-            // --- PERBAIKAN ---
-            // Hapus class animasi dari elemen yang benar
             modal.classList.remove('modal-bg-animate');
-            modal.querySelector('.modal-content-animate').classList.remove('modal-content-animate');
-            // --- AKHIR PERBAIKAN ---
+            if (modalContent) {
+                modalContent.classList.remove('modal-content-animate');
+            }
         }
 
         // ===========================================
         // FUNGSI TAB
         // ===========================================
         function setActiveTab(tabName) {
-            // Set status tombol
             tabButtons.forEach(button => {
                 if (button.id === `tab-${tabName}`) {
                     button.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
@@ -705,7 +685,6 @@
                 }
             });
 
-            // Tampilkan konten
             tabContents.forEach(content => {
                 if (content.id === `content-${tabName}`) {
                     content.classList.remove('hidden');
@@ -714,9 +693,8 @@
                 }
             });
 
-            // Render ulang chart jika tab infografis dipilih (memperbaiki masalah render)
             if (tabName === 'infografis') {
-                setTimeout(renderAllCharts, 10); // beri sedikit delay agar transisi mulus
+                setTimeout(renderAllCharts, 10);
             }
         }
 
@@ -724,18 +702,12 @@
         // EVENT LISTENERS
         // ===========================================
         function setupEventListeners() {
-            // Listener untuk filter
             searchInput.addEventListener('input', applyFilters);
             classFilter.addEventListener('change', applyFilters);
 
-            // Listener untuk Tab
             tabBiodata.addEventListener('click', () => setActiveTab('biodata'));
             tabInfografis.addEventListener('click', () => setActiveTab('infografis'));
-
-            // Listener untuk Modal (ditutup saat klik background)
-            // Di-handle oleh onclick di elemen HTML
         }
-
     </script>
 </body>
 </html>
