@@ -98,7 +98,7 @@
             <div id="content-biodata" class="tab-content">
                 <!-- Kontrol Filter -->
                 <div class="bg-white p-4 rounded-lg shadow-md mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Filter Pencarian Nama -->
                         <div>
                             <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Cari Nama</label>
@@ -111,6 +111,13 @@
                                 <option value="">Semua Kelas</option>
                                 <!-- Opsi kelas akan diisi oleh JavaScript -->
                             </select>
+                        </div>
+                        <!-- Filter Status Pindah (Dibuat menjadi Checkbox) -->
+                        <div class="flex items-center h-full pt-5 md:pt-6">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" id="status-filter" class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer transition-colors">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Filter: Siswa Pindah / Keluar</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -233,6 +240,7 @@
         // Elemen Filter
         const searchInput = document.getElementById('search-input');
         const classFilter = document.getElementById('class-filter');
+        const statusFilter = document.getElementById('status-filter'); // BARU
         
         // Elemen Tab
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -303,7 +311,10 @@
 
                 // Panggil fungsi render
                 populateClassFilter();
-                renderTable();
+                
+                // Menerapkan filter default saat pertama kali dimuat (Siswa Aktif)
+                applyFilters(); 
+                
                 renderAllCharts();
 
                 // Tampilkan konten setelah data siap
@@ -327,10 +338,10 @@
 
                 // Panggil fungsi render dengan data mock
                 populateClassFilter();
-                renderTable();
+                applyFilters(); // Panggil filter default
                 renderAllCharts();
 
-                loadingSpinner.classList.add('hidden');
+                // Sembunyikan spinner
                 mainContent.classList.remove('hidden');
             }
         }
@@ -338,6 +349,22 @@
         // ===========================================
         // RENDER TABEL BIODATA
         // ===========================================
+
+        // Helper fungsi untuk mendeteksi siswa pindah/keluar
+        function checkStatusPindah(student) {
+            // Cek di SEMUA kolom yang ada untuk mendeteksi kata keterangan pindah
+            for (let key in student) {
+                if (student[key] !== null && student[key] !== undefined) {
+                    const val = String(student[key]).toLowerCase();
+                    // Deteksi kata kunci
+                    if (val.includes('pindah') || val.includes('keluar') || val.includes('mutasi') || val.includes('berhenti')) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         function renderTable() {
             // Kosongkan tabel
             tableBody.innerHTML = '';
@@ -357,6 +384,12 @@
                 // Data default jika kosong
                 const photoUrl = student['Pass Photo'] || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Foto';
                 const studentName = student['Nama Lengkap'] || 'N/A';
+                
+                // Buat Label / Badge Status
+                const isPindah = checkStatusPindah(student);
+                const statusBadge = isPindah 
+                    ? `<span class="ml-2 px-2 inline-flex text-[10px] leading-4 font-semibold rounded-full bg-red-100 text-red-700">Pindah / Keluar</span>` 
+                    : ``; // Badge aktif dihilangkan sesuai permintaan
 
                 tr.innerHTML = `
                     <td class="px-5 py-4 whitespace-nowrap">
@@ -372,7 +405,7 @@
                         class="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
                         onclick="showModal(${index})"
                     >
-                        ${studentName}
+                        ${studentName} ${statusBadge}
                     </td>
                     <td class="px-5 py-4 whitespace-nowrap text-sm text-gray-600">${student['Kelas'] || 'N/A'}</td>
                 `;
@@ -426,6 +459,9 @@
 
             if (!ctxTotalGender || !ctxTotalLevel) return;
 
+            // HANYA HITUNG SISWA AKTIF UNTUK INFOGRAFIS
+            const activeStudentsForChart = allStudents.filter(s => !checkStatusPindah(s));
+
             // 3. Proses data (Perhitungan Gender dan Jenjang dibuat terpisah agar akurat)
             let counts = {
                 putra: 0,
@@ -436,7 +472,7 @@
                 levelLainnya: 0
             };
 
-            allStudents.forEach(student => {
+            activeStudentsForChart.forEach(student => {
                 const level = getLevel(student.Kelas);
                 const gender = getGender(student.Kelas);
 
@@ -536,13 +572,16 @@
         // FUNGSI FILTER
         // ===========================================
         function populateClassFilter() {
-            // Hitung total semua data untuk opsi "Semua Kelas" (Opsional, tapi informatif)
-            const totalSantri = allStudents.length;
+            // Filter hanya siswa aktif untuk dihitung di menu filter
+            const activeStudents = allStudents.filter(s => !checkStatusPindah(s));
+
+            // Hitung total semua data aktif untuk opsi "Semua Kelas"
+            const totalSantri = activeStudents.length;
             classFilter.innerHTML = `<option value="">Semua Kelas ( ${totalSantri} santri )</option>`;
             
-            // Hitung jumlah santri per kelas
+            // Hitung jumlah santri per kelas HANYA dari siswa aktif
             const classCounts = {};
-            allStudents.forEach(student => {
+            activeStudents.forEach(student => {
                 const kelas = student.Kelas;
                 if (kelas && kelas.trim() !== '') {
                     classCounts[kelas] = (classCounts[kelas] || 0) + 1;
@@ -564,12 +603,20 @@
         function applyFilters() {
             const searchText = searchInput.value.toLowerCase();
             const selectedClass = classFilter.value;
+            const isPindahChecked = statusFilter.checked; // Ambil nilai centang checkbox
 
             filteredStudents = allStudents.filter(student => {
                 const name = student['Nama Lengkap'] || '';
                 const nameMatch = name.toLowerCase().includes(searchText);
                 const classMatch = (selectedClass === '' || student.Kelas === selectedClass);
-                return nameMatch && classMatch;
+                
+                // Cek pencocokan status (Aktif vs Pindah)
+                const isPindah = checkStatusPindah(student);
+                
+                // Jika checkbox dicentang -> Tampilkan yg Pindah. Jika tidak -> Tampilkan yg Aktif
+                const statusMatch = isPindahChecked ? isPindah : !isPindah;
+
+                return nameMatch && classMatch && statusMatch;
             });
 
             renderTable();
@@ -646,9 +693,12 @@
         // EVENT LISTENERS
         // ===========================================
         function setupEventListeners() {
+            // Listener untuk filter
             searchInput.addEventListener('input', applyFilters);
             classFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters); // Listener baru
 
+            // Listener untuk Tab
             tabBiodata.addEventListener('click', () => setActiveTab('biodata'));
             tabInfografis.addEventListener('click', () => setActiveTab('infografis'));
         }
