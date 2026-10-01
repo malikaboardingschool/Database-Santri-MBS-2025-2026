@@ -161,24 +161,6 @@
                         </div>
                     </div>
 
-                    <!-- Chart 3: Detail Putra -->
-                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
-                        <h2 class="text-xl font-bold mb-4 text-gray-700">Detail Siswa (Putra)</h2>
-                        <p class="text-sm text-gray-600 mb-4">Perbandingan jumlah siswa (Putra) di jenjang SMP dan SMA.</p>
-                        <div class="relative h-80 w-full">
-                            <canvas id="putra-chart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart 4: Detail Putri -->
-                    <div class="bg-white p-4 md:p-6 rounded-lg shadow-md">
-                        <h2 class="text-xl font-bold mb-4 text-gray-700">Detail Siswi (Putri)</h2>
-                        <p class="text-sm text-gray-600 mb-4">Perbandingan jumlah siswi (Putri) di jenjang SMP dan SMA.</p>
-                        <div class="relative h-80 w-full">
-                            <canvas id="putri-chart"></canvas>
-                        </div>
-                    </div>
-
                 </div>
             </div>
 
@@ -406,8 +388,18 @@
         function getLevel(kelas) {
             if (!kelas || typeof kelas !== 'string') return 'Lainnya';
             const k = kelas.toLowerCase();
+            
+            // Cek kata eksplisit
             if (k.includes('smp')) return 'SMP';
             if (k.includes('sma')) return 'SMA';
+            
+            // Cek otomatis dari angka/tingkat kelas
+            // SMP: Kelas 7, 8, 9 atau VII, VIII, IX
+            if (/(^|\b|[^0-9a-z])(7|8|9|vii|viii|ix)([^0-9]|$)/.test(k)) return 'SMP';
+            
+            // SMA: Kelas 10, 11, 12 atau X, XI, XII
+            if (/(^|\b|[^0-9a-z])(10|11|12|x|xi|xii)([^0-9]|$)/.test(k)) return 'SMA';
+            
             return 'Lainnya';
         }
 
@@ -415,8 +407,11 @@
         function getGender(kelas) {
             if (!kelas || typeof kelas !== 'string') return 'Lainnya';
             const k = kelas.toLowerCase();
-            if (k.includes('putra')) return 'Putra';
-            if (k.includes('putri')) return 'Putri';
+            
+            // Cek otomatis variasi kata untuk Putra/Putri
+            if (k.includes('putra') || k.includes('pa') || k.includes('ikhwan') || k.includes('laki')) return 'Putra';
+            if (k.includes('putri') || k.includes('pi') || k.includes('akhwat') || k.includes('perempuan')) return 'Putri';
+            
             return 'Lainnya';
         }
 
@@ -424,54 +419,44 @@
             // 1. Hancurkan chart lama jika ada
             if (activeCharts.totalGender) activeCharts.totalGender.destroy();
             if (activeCharts.totalLevel) activeCharts.totalLevel.destroy();
-            if (activeCharts.putra) activeCharts.putra.destroy();
-            if (activeCharts.putri) activeCharts.putri.destroy();
             
             // 2. Ambil canvas
             const ctxTotalGender = document.getElementById('total-gender-chart')?.getContext('2d');
             const ctxTotalLevel = document.getElementById('total-level-chart')?.getContext('2d');
-            const ctxPutra = document.getElementById('putra-chart')?.getContext('2d');
-            const ctxPutri = document.getElementById('putri-chart')?.getContext('2d');
 
-            if (!ctxTotalGender || !ctxTotalLevel || !ctxPutra || !ctxPutri) return;
+            if (!ctxTotalGender || !ctxTotalLevel) return;
 
-            // 3. Proses data
+            // 3. Proses data (Perhitungan Gender dan Jenjang dibuat terpisah agar akurat)
             let counts = {
-                smpPutra: 0,
-                smpPutri: 0,
-                smaPutra: 0,
-                smaPutri: 0,
-                lainnya: 0
+                putra: 0,
+                putri: 0,
+                genderLainnya: 0,
+                smp: 0,
+                sma: 0,
+                levelLainnya: 0
             };
 
             allStudents.forEach(student => {
                 const level = getLevel(student.Kelas);
                 const gender = getGender(student.Kelas);
 
-                if (level === 'SMP') {
-                    if (gender === 'Putra') counts.smpPutra++;
-                    else if (gender === 'Putri') counts.smpPutri++;
-                    else counts.lainnya++;
-                } else if (level === 'SMA') {
-                    if (gender === 'Putra') counts.smaPutra++;
-                    else if (gender === 'Putri') counts.smaPutri++;
-                    else counts.lainnya++;
-                } else {
-                    counts.lainnya++;
-                }
-            });
+                // Hitung gender mandiri
+                if (gender === 'Putra') counts.putra++;
+                else if (gender === 'Putri') counts.putri++;
+                else counts.genderLainnya++;
 
-            const totalPutra = counts.smpPutra + counts.smaPutra;
-            const totalPutri = counts.smpPutri + counts.smaPutri;
-            const totalSmp = counts.smpPutra + counts.smpPutri;
-            const totalSma = counts.smaPutra + counts.smaPutri;
+                // Hitung jenjang mandiri
+                if (level === 'SMP') counts.smp++;
+                else if (level === 'SMA') counts.sma++;
+                else counts.levelLainnya++;
+            });
 
             // 4. Render Chart 1: Total Siswa vs Siswi (Doughnut)
             const totalLabels = ['Siswa (Putra)', 'Siswi (Putri)'];
-            const totalData = [totalPutra, totalPutri];
-            if (counts.lainnya > 0) {
+            const totalData = [counts.putra, counts.putri];
+            if (counts.genderLainnya > 0) {
                 totalLabels.push('Lainnya');
-                totalData.push(counts.lainnya);
+                totalData.push(counts.genderLainnya);
             }
 
             activeCharts.totalGender = new Chart(ctxTotalGender, {
@@ -508,10 +493,10 @@
 
             // 5. Render Chart 2: Total SMP vs SMA (Doughnut)
             const levelLabels = ['SMP', 'SMA'];
-            const levelData = [totalSmp, totalSma];
-            if (counts.lainnya > 0) {
+            const levelData = [counts.smp, counts.sma];
+            if (counts.levelLainnya > 0) {
                 levelLabels.push('Lainnya');
-                levelData.push(counts.lainnya);
+                levelData.push(counts.levelLainnya);
             }
 
             activeCharts.totalLevel = new Chart(ctxTotalLevel, {
@@ -545,75 +530,34 @@
                     }
                 }
             });
-
-            // Opsi umum untuk bar chart horizontal
-            const barOptions = {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { beginAtZero: true, grid: { display: false } },
-                    y: { grid: { display: false } }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: (c) => ` ${c.raw} siswa` } },
-                    datalabels: {
-                        color: '#ffffff',
-                        font: { weight: 'bold', size: 14 },
-                        align: 'center',
-                        anchor: 'center',
-                        formatter: (value) => value > 0 ? value : ''
-                    }
-                }
-            };
-
-            // 6. Render Chart 3: Detail Putra (Bar)
-            activeCharts.putra = new Chart(ctxPutra, {
-                type: 'bar',
-                data: {
-                    labels: ['SMP Putra', 'SMA Putra'],
-                    datasets: [{
-                        label: 'Jumlah Siswa (Putra)',
-                        data: [counts.smpPutra, counts.smaPutra],
-                        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(59, 130, 246, 0.9)'],
-                        borderColor: ['rgba(59, 130, 246, 1)', 'rgba(59, 130, 246, 1)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: barOptions
-            });
-
-            // 7. Render Chart 4: Detail Putri (Bar)
-            activeCharts.putri = new Chart(ctxPutri, {
-                type: 'bar',
-                data: {
-                    labels: ['SMP Putri', 'SMA Putri'],
-                    datasets: [{
-                        label: 'Jumlah Siswi (Putri)',
-                        data: [counts.smpPutri, counts.smaPutri],
-                        backgroundColor: ['rgba(236, 72, 153, 0.7)', 'rgba(236, 72, 153, 0.9)'],
-                        borderColor: ['rgba(236, 72, 153, 1)', 'rgba(236, 72, 153, 1)'],
-                        borderWidth: 1
-                    }]
-                },
-                options: { ...barOptions, plugins: { ...barOptions.plugins, tooltip: { callbacks: { label: (c) => ` ${c.raw} siswi` } } } }
-            });
         }
 
         // ===========================================
         // FUNGSI FILTER
         // ===========================================
         function populateClassFilter() {
-            classFilter.innerHTML = '<option value="">Semua Kelas</option>';
-            const classes = [...new Set(allStudents.map(s => s.Kelas))];
-            classes.sort().forEach(kelas => {
+            // Hitung total semua data untuk opsi "Semua Kelas" (Opsional, tapi informatif)
+            const totalSantri = allStudents.length;
+            classFilter.innerHTML = `<option value="">Semua Kelas ( ${totalSantri} santri )</option>`;
+            
+            // Hitung jumlah santri per kelas
+            const classCounts = {};
+            allStudents.forEach(student => {
+                const kelas = student.Kelas;
                 if (kelas && kelas.trim() !== '') {
-                    const option = document.createElement('option');
-                    option.value = kelas;
-                    option.textContent = kelas;
-                    classFilter.appendChild(option);
+                    classCounts[kelas] = (classCounts[kelas] || 0) + 1;
                 }
+            });
+
+            // Ambil daftar kelas unik dan urutkan
+            const classes = Object.keys(classCounts).sort();
+            
+            classes.forEach(kelas => {
+                const option = document.createElement('option');
+                option.value = kelas; // Value tetap menggunakan nama asli agar filter berfungsi
+                // Tambahkan teks jumlah santri ke label
+                option.textContent = `${kelas} ( ${classCounts[kelas]} santri )`;
+                classFilter.appendChild(option);
             });
         }
 
