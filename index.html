@@ -629,22 +629,30 @@
             const student = filteredStudents[index];
             if (!student) return;
 
-            const photoUrl = student['Pass Photo'] || 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Foto';
-            const studentName = student['Nama Lengkap'] || 'Foto Santri';
+            // Fitur Pencarian Pintar (Fuzzy Match) untuk mendeteksi nama kolom secara otomatis
+            // Ini akan mencari kolom yang "mengandung" kata tertentu (misal: "ayah") 
+            // sehingga tidak peduli apapun spasi/karakter tersembunyi di header Google Sheet, datanya tetap terbaca.
+            const findKey = (keyword) => Object.keys(student).find(key => key && key.toLowerCase().includes(keyword.toLowerCase()));
+
+            const keyPhoto = findKey('photo') || findKey('foto');
+            const keyNama = findKey('nama lengkap') || findKey('nama');
+
+            const photoUrl = keyPhoto && student[keyPhoto] ? student[keyPhoto] : 'https://placehold.co/100x100/e2e8f0/94a3b8?text=Foto';
+            const studentName = keyNama && student[keyNama] ? student[keyNama] : 'Foto Santri';
 
             // Mengisi Foto
             modalImage.src = photoUrl;
             modalImage.alt = studentName;
 
-            // Mengisi Biodata
-            document.getElementById('modal-nama').textContent = student['Nama Lengkap'] || 'N/A';
-            document.getElementById('modal-nis').textContent = student['NIS'] || 'N/A';
-            document.getElementById('modal-kelas').textContent = student['Kelas'] || 'N/A';
-            document.getElementById('modal-ttl').textContent = student['Tempat Tanggal Lahir'] || 'N/A';
-            document.getElementById('modal-ayah').textContent = student['DATA SISWA SMP SMA MALIKA IBS TAHUN AJARAN 2025 - 2026 Nama Ayah'] || student['Nama Ayah'] || 'N/A';
-            document.getElementById('modal-ibu').textContent = student['Nama Ibu'] || 'N/A';
-            document.getElementById('modal-telepon').textContent = student['Nomor Telepon Orang Tua'] || 'N/A';
-            document.getElementById('modal-alamat').textContent = student['Alamat'] || 'N/A';
+            // Mengisi Biodata dengan pencarian kunci pintar (otomatis)
+            document.getElementById('modal-nama').textContent = studentName;
+            document.getElementById('modal-nis').textContent = student[findKey('nis')] || 'N/A';
+            document.getElementById('modal-kelas').textContent = student[findKey('kelas')] || 'N/A';
+            document.getElementById('modal-ttl').textContent = student[findKey('lahir') || findKey('ttl')] || 'N/A';
+            document.getElementById('modal-ayah').textContent = student[findKey('ayah')] || 'N/A';
+            document.getElementById('modal-ibu').textContent = student[findKey('ibu')] || 'N/A';
+            document.getElementById('modal-telepon').textContent = student[findKey('telepon') || findKey('hp')] || 'N/A';
+            document.getElementById('modal-alamat').textContent = student[findKey('alamat')] || 'N/A';
 
             // Tampilkan Modal
             modal.classList.remove('hidden');
